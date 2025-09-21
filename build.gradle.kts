@@ -29,7 +29,7 @@ tasks.test {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "21
+        jvmTarget = "21"
         freeCompilerArgs = listOf("-Xjsr305=strict")
     }
 }
