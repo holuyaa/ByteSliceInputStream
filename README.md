@@ -16,14 +16,20 @@ A high-performance, zero-copy InputStream implementation for Kotlin that returns
 ### Traditional BufferedInputStream Problems
 
 ```kotlin
-// Traditional approach - memory copying overhead
+ㅁ// Traditional BufferedInputStream - safe but inefficient
 val buffer = ByteArray(1024)
 val bytesRead = bufferedInputStream.read(buffer) // System.arraycopy happens here!
+// ✅ Safe: you get your own copy of data
+// ❌ Inefficient: memory copying overhead
 
-// Buffer reuse causes potential data corruption
-val slice1 = someReference // Points to buffer
-bufferedInputStream.read(buffer) // Overwrites buffer content!
-// slice1 now references corrupted data
+// Attempting zero-copy views with BufferedInputStream - problematic!
+class ProblematicSlice(private val buffer: ByteArray, offset: Int, length: Int) {
+    // This would reference BufferedInputStream's internal buffer
+}
+
+val slice1 = ProblematicSlice(bufferedInputStream.internalBuffer, 0, 100)
+bufferedInputStream.read() // Internal buffer gets overwritten!
+// ❌ slice1 now references corrupted data
 ```
 
 ### ByteSliceInputStream Solution
@@ -160,11 +166,12 @@ val singleByte = sliceStream.readByte()
 
 ### Comparison with Alternatives
 
-| Approach | Memory Copies | Data Safety | Concurrent Access | Slicing |
-|----------|---------------|-------------|-------------------|---------|
-| BufferedInputStream | High | ❌ Buffer reuse issues | ❌ Unsafe | ❌ Manual |
-| ByteBuffer | Low | ⚠️ Shared views | ⚠️ Complex | ✅ Built-in |
-| ByteSliceInputStream | **Minimal** | ✅ **Independent buffers** | ✅ **Thread-safe** | ✅ **Intuitive** |
+| Approach | Memory Copies | Zero-Copy Views | Buffer Reuse Issues | Slicing |
+|----------|---------------|-----------------|---------------------|---------|
+| BufferedInputStream | High | ❌ No views | ✅ Safe (copies data) | ❌ Manual |
+| BufferedInputStream + Custom Views | Low | ⚠️ Possible | ❌ **Buffer reuse corruption** | ⚠️ Complex |
+| ByteBuffer | Low | ✅ Built-in | ⚠️ Shared views | ✅ Built-in |
+| ByteSliceInputStream | **Minimal** | ✅ **Independent buffers** | ✅ **No reuse conflicts** | ✅ **Intuitive** |
 
 ## 🔒 Thread Safety
 
@@ -203,37 +210,113 @@ val slice = ByteSliceInputStream(file.inputStream()).read()
 ```
 ByteSliceInputStream/
 ├── README.md
-├── src/
-│   ├── ByteSlice.kt
-│   ├── ByteSliceInputStream.kt
-│   └── Demo.kt
 ├── LICENSE
-└── .gitignore
+├── .gitignore
+├── build.gradle.kts
+├── gradle.properties
+├── gradle/wrapper/
+│   └── gradle-wrapper.properties
+├── .github/workflows/
+│   ├── ci.yml
+│   └── publish.yml
+├── src/
+│   ├── main/kotlin/
+│   │   ├── ByteSlice.kt
+│   │   └── ByteSliceInputStream.kt
+│   └── test/kotlin/
+│       ├── ByteSliceTest.kt
+│       └── ByteSliceInputStreamTest.kt
+└── examples/
+    └── Demo.kt
 ```
 
-### Compile and Run
+### Build Commands
 ```bash
-# Compile all Kotlin files
-kotlinc src/*.kt -include-runtime -d ByteSliceInputStream.jar
+# Run tests
+./gradlew test
 
-# Run the demo
-kotlin -classpath ByteSliceInputStream.jar DemoKt
+# Build the project
+./gradlew build
+
+# Generate documentation
+./gradlew dokkaHtml
+
+# Publish to local Maven repository
+./gradlew publishToMavenLocal
+
+# Publish to Maven Central (requires credentials)
+./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
 ```
 
-### Usage in Your Project
-Simply copy `ByteSlice.kt` and `ByteSliceInputStream.kt` into your project:
+### Maven Dependency
+Once published to Maven Central, you can use it in your projects:
 
+#### Gradle (Kotlin DSL)
 ```kotlin
-// Import if needed (depending on your package structure)
-import ByteSlice
-import ByteSliceInputStream
-
-// Use directly in your code
-val stream = ByteSliceInputStream(fileInputStream)
-val slice = stream.read(1024)
+dependencies {
+    implementation("io.github.yourusername:bytesliceinputstream:1.0.0")
+}
 ```
 
-## 📄 License
+#### Gradle (Groovy DSL)
+```groovy
+dependencies {
+    implementation 'io.github.yourusername:bytesliceinputstream:1.0.0'
+}
+```
+
+#### Maven
+```xml
+<dependency>
+    <groupId>io.github.yourusername</groupId>
+    <artifactId>bytesliceinputstream</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+### Development Setup
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/ByteSliceInputStream.git
+cd ByteSliceInputStream
+
+# Make gradlew executable (Unix/Linux/macOS)
+chmod +x gradlew
+
+# Run tests to verify setup
+./gradlew test
+```
+
+## 🧪 Testing
+
+The project includes comprehensive test suites:
+
+- **ByteSliceTest**: Tests all ByteSlice functionality including slicing, range operations, and data integrity
+- **ByteSliceInputStreamTest**: Tests stream operations, EOF handling, and large data processing
+
+### Running Tests
+```bash
+# Run all tests
+./gradlew test
+
+# Run tests with detailed output
+./gradlew test --info
+
+# Run specific test class
+./gradlew test --tests "ByteSliceTest"
+
+# Generate test report
+./gradlew test jacocoTestReport
+```
+
+### Test Coverage
+The test suite covers:
+- ✅ All public API methods
+- ✅ Edge cases and error conditions
+- ✅ Large data handling (>20KB)
+- ✅ Memory safety and independence
+- ✅ Performance characteristics
+- ✅ Thread safety aspects
 
 This project is released under the MIT License. Feel free to use, modify, and distribute as needed.
 
