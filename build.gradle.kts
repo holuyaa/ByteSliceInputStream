@@ -1,13 +1,13 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "1.9.22"
     `maven-publish`
     signing
-    id("org.jetbrains.dokka") version "1.8.20"
+    id("org.jetbrains.dokka") version "1.9.20"
 }
 
-group = "io.github.yourusername"
+group = "dev.hh46"
 version = "1.0.0"
 description = "A high-performance, zero-copy InputStream implementation for Kotlin"
 
@@ -29,7 +29,7 @@ tasks.test {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "21
         freeCompilerArgs = listOf("-Xjsr305=strict")
     }
 }

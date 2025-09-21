@@ -1,4 +1,4 @@
-/*
+package dev.hh46/*
  * Copyright (c) 2025 Hyoungho Choi <holuyaa@gmail.com>
  *
  * This source code is licensed under the MIT license found in the
@@ -8,7 +8,7 @@
 import java.io.*
 
 /**
- * Zero-Copy InputStream that returns ByteSlice Each read() call allocates a new independent buffer
+ * Zero-Copy InputStream that returns dev.hh46.ByteSlice Each read() call allocates a new independent buffer
  * ensuring complete data safety
  */
 class ByteSliceInputStream(private val inputStream: InputStream) : AutoCloseable {
@@ -16,11 +16,11 @@ class ByteSliceInputStream(private val inputStream: InputStream) : AutoCloseable
   private var isEOF = false
 
   /**
-   * Reads data of specified length and returns it as an independent ByteSlice
+   * Reads data of specified length and returns it as an independent dev.hh46.ByteSlice
    *
    * @param offset Number of bytes to skip from the stream (default: 0)
    * @param length Maximum number of bytes to read
-   * @return ByteSlice of actually read data, null if EOF
+   * @return dev.hh46.ByteSlice of actually read data, null if EOF
    */
   fun read(offset: Int = 0, length: Int = 8192): ByteSlice? {
     require(offset >= 0) { "Offset must be non-negative" }
@@ -51,7 +51,7 @@ class ByteSliceInputStream(private val inputStream: InputStream) : AutoCloseable
       return null
     }
 
-    // Each ByteSlice owns a unique buffer, making it completely safe
+    // Each dev.hh46.ByteSlice owns a unique buffer, making it completely safe
     return ByteSlice(buffer, 0, bytesRead)
   }
 
@@ -85,7 +85,7 @@ class ByteSliceInputStream(private val inputStream: InputStream) : AutoCloseable
     return result
   }
 
-  /** Reads all data into one large ByteSlice */
+  /** Reads all data into one large dev.hh46.ByteSlice */
   fun readAll(): ByteSlice? {
     val chunks = mutableListOf<ByteArray>()
     var totalSize = 0

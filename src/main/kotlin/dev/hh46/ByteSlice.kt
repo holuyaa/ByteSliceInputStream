@@ -1,4 +1,4 @@
-/*
+package dev.hh46/*
  * Copyright (c) 2025 Hyoungho Choi <holuyaa@gmail.com>
  *
  * This source code is licensed under the MIT license found in the
@@ -6,8 +6,8 @@
  */
 
 /**
- * Immutable ByteSlice - A view that references a specific region of an independent buffer Each
- * ByteSlice owns a unique buffer, ensuring complete isolation from other slices
+ * Immutable dev.hh46.ByteSlice - A view that references a specific region of an independent buffer Each
+ * dev.hh46.ByteSlice owns a unique buffer, ensuring complete isolation from other slices
  */
 class ByteSlice
 internal constructor(private val buffer: ByteArray, private val startOffset: Int, val length: Int) {
@@ -29,7 +29,7 @@ internal constructor(private val buffer: ByteArray, private val startOffset: Int
   /**
    * Range-based slicing (Python/Rust style)
    * @param range Index range to slice
-   * @return New ByteSlice (sub-slice)
+   * @return New dev.hh46.ByteSlice (sub-slice)
    */
   operator fun get(range: IntRange): ByteSlice {
     val start = range.first
@@ -94,7 +94,7 @@ internal constructor(private val buffer: ByteArray, private val startOffset: Int
 
   /** String representation for debugging */
   override fun toString(): String {
-    return "ByteSlice(offset=$startOffset, length=$length)"
+    return "dev.hh46.ByteSlice(offset=$startOffset, length=$length)"
   }
 
   /** Checks if two slices reference the same data */
